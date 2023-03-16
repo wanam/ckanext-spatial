@@ -652,6 +652,14 @@ class SpatialHarvester(HarvesterBase):
         harvest_object.current = True
         harvest_object.add()
 
+        # Check if translation is needed
+        self.translate_lang = self._get_object_extra(harvest_object, 'translate_lang')
+        if self.translate_lang:
+            if self.translator is None:
+                # Initialize translator
+                log.debug('Translation language: %s', self.translate_lang)
+                self.init_translate(self.translate_lang)
+
         if status == 'new':
             package_schema = logic.schema.default_create_package_schema()
             package_schema['tags'] = tag_schema
@@ -672,6 +680,9 @@ class SpatialHarvester(HarvesterBase):
             model.Session.flush()
 
             try:
+                if self.translate_lang:
+                    self.translate_pakage(package_dict)
+
                 package_id = p.toolkit.get_action('package_create')(context, package_dict)
                 log.info('Created new package %s with guid %s', package_id, harvest_object.guid)
             except p.toolkit.ValidationError as e:
@@ -718,6 +729,9 @@ class SpatialHarvester(HarvesterBase):
 
                 package_dict['id'] = harvest_object.package_id
                 try:
+                    if self.translate_lang:
+                        self.translate_pakage(package_dict)
+
                     package_id = p.toolkit.get_action('package_update')(context, package_dict)
                     log.info('Updated package %s with guid %s', package_id, harvest_object.guid)
                 except p.toolkit.ValidationError as e:

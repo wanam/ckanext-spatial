@@ -116,6 +116,8 @@ class CSWHarvester(SpatialHarvester, SingletonPlugin):
         for guid in new:
             obj = HarvestObject(guid=guid, job=harvest_job,
                                 extras=[HOExtra(key='status', value='new')])
+            if harvest_job.translate_lang:
+                obj.extras.append(HOExtra(key='translate_lang', value=harvest_job.translate_lang))
             obj.save()
             ids.append(obj.id)
         for guid in change:
@@ -131,6 +133,8 @@ class CSWHarvester(SpatialHarvester, SingletonPlugin):
             model.Session.query(HarvestObject).\
                   filter_by(guid=guid).\
                   update({'current': False}, False)
+            if harvest_job.translate_lang:
+                obj.extras.append(HOExtra(key='translate_lang', value=harvest_job.translate_lang))
             obj.save()
             ids.append(obj.id)
 
